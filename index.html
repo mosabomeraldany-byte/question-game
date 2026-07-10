@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحدي الذكاء الخارق 🧠🏆</title>
+    <title>تحدي الذكاء الخارق</title>
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #050b14, #101f38);
             --card-bg: rgba(255, 255, 255, 0.05);
             --border-color: rgba(255, 255, 255, 0.08);
             --text-color: #ffffff;
@@ -18,14 +17,25 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 
+        /* خلفية متوهجة ومتحركة */
         body {
-            background: var(--bg-gradient);
+            background: linear-gradient(-45deg, #050b14, #101f38, #1a0b2e, #0a1f1d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             color: var(--text-color);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .quiz-container {
@@ -37,18 +47,18 @@
             -webkit-backdrop-filter: blur(20px);
             border-radius: 30px;
             padding: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.15);
             text-align: center;
+            position: relative;
+            z-index: 10;
         }
 
-        .header {
-            margin-bottom: 25px;
-        }
-
+        .header { margin-bottom: 25px; }
         .header h1 {
             font-size: 1.6rem;
             color: var(--primary);
             margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
         }
 
         .progress-bar {
@@ -102,6 +112,7 @@
             border-color: var(--primary);
             background: rgba(0, 242, 254, 0.03);
             transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
         }
 
         .option-btn.correct {
@@ -109,12 +120,14 @@
             border-color: var(--success) !important;
             color: #fff;
             font-weight: bold;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
         }
 
         .option-btn.wrong {
             background: rgba(239, 68, 68, 0.2) !important;
             border-color: var(--danger) !important;
             color: #fff;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
         }
 
         .next-btn {
@@ -129,14 +142,15 @@
             cursor: pointer;
             transition: opacity 0.2s;
             display: none;
+            box-shadow: 0 5px 15px rgba(157, 78, 221, 0.4);
         }
 
         .next-btn:hover { opacity: 0.9; }
 
-        /* شاشة النتيجة النهائية */
         .result-screen { display: none; }
-        .score-text { font-size: 3rem; font-weight: bold; margin: 20px 0; color: var(--primary); }
+        .score-text { font-size: 3rem; font-weight: bold; margin: 20px 0; color: var(--primary); text-shadow: 0 0 15px rgba(0, 242, 254, 0.6); }
         .feedback { font-size: 1.2rem; color: #94a3b8; margin-bottom: 25px; }
+        
         .restart-btn {
             padding: 12px 30px;
             border: 1px solid var(--primary);
@@ -147,15 +161,29 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        .restart-btn:hover { background: var(--primary); color: #000; }
+        .restart-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+
+        /* لوحة الألعاب النارية */
+        #fireworks-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
+    <canvas id="fireworks-canvas"></canvas>
+
     <div class="quiz-container">
         <div id="quiz-screen">
             <div class="header">
-                <h1>تحدي العباقرة 🧠</h1>
+                <h1>تحدي العباقرة</h1>
                 <div style="font-size: 0.85rem; color: #94a3b8;">السؤال <span id="current-question-num">1</span> من 5</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress"></div>
@@ -164,52 +192,77 @@
 
             <div class="question-text" id="question">جاري تحميل السؤال الأول...</div>
 
-            <div class="options-list" id="options">
-                </div>
+            <div class="options-list" id="options"></div>
 
-            <button class="next-btn" id="next-button" onclick="nextQuestion()">السؤال التالي ➡️</button>
+            <button class="next-btn" id="next-button" onclick="nextQuestion()">السؤال التالي</button>
         </div>
 
         <div id="result-screen" class="result-screen">
-            <h2>🎉 انتهى التحدي!</h2>
+            <h2>انتهى التحدي</h2>
             <div class="score-text"><span id="score">0</span> / 5</div>
-            <div class="feedback" id="feedback-text">مستوى رائع!</div>
-            <button class="restart-btn" onclick="restartQuiz()">إعادة التحدي 🔄</button>
+            <div class="feedback" id="feedback-text">مستوى رائع</div>
+            <button class="restart-btn" onclick="restartQuiz()">إعادة التحدي</button>
         </div>
     </div>
 
 <script>
-    // مصفوفة الأسئلة
-    const quizData = [
-        {
-            question: "ما هو الكوكب الملقب بالكوكب الأحمر؟ 🪐",
-            options: ["المشتري", "المريخ", "الزهرة", "عطارد"],
-            correct: 1
-        },
-        {
-            question: "أي مما يلي يُعد لغة لبرمجة وتصميم واجهات مواقع الويب؟ 💻",
-            options: ["Python", "HTML", "C++", "SQL"],
-            correct: 1
-        },
-        {
-            question: "ما هو أسرع حيوان بري في العالم؟ 🐆",
-            options: ["النمر", "الأسد", "الفهد الصياد", "الغزال"],
-            correct: 2
-        },
-        {
-            question: "كم عدد قارات العالم؟ 🌍",
-            options: ["5 قارات", "6 قارات", "7 قارات", "8 قارات"],
-            correct: 2
-        },
-        {
-            question: "ما هو الرمز الكيميائي للماء؟ 💧",
-            options: ["CO2", "H2O", "O2", "NaCl"],
-            correct: 1
-        }
+    const questionPool = [
+        { question: "ما هو الكوكب الملقب بالكوكب الأحمر؟", options: ["المشتري", "المريخ", "الزهرة", "عطارد"], correct: 1 },
+        { question: "أي مما يلي يعد لغة لتصميم واجهات الويب؟", options: ["Python", "HTML", "C++", "SQL"], correct: 1 },
+        { question: "ما هو أسرع حيوان بري في العالم?", options: ["النمر", "الأسد", "الفهد", "الغزال"], correct: 2 },
+        { question: "كم عدد قارات العالم؟", options: ["5 قارات", "6 قارات", "7 قارات", "8 قارات"], correct: 2 },
+        { question: "ما هو الرمز الكيميائي للماء؟", options: ["CO2", "H2O", "O2", "NaCl"], correct: 1 },
+        { question: "ما هي عاصمة جمهورية مصر العربية؟", options: ["الإسكندرية", "أسوان", "القاهرة", "الجيزة"], correct: 2 },
+        { question: "ما هو أكبر المحيطات في العالم مساحة؟", options: ["المحيط الأطلسي", "المحيط الهندي", "المحيط الهادئ", "المحيط المتجمد"], correct: 2 },
+        { question: "من هو مخترع المصباح الكهربائي؟", options: ["نيقولا تيسلا", "توماس أديسون", "ألكسندر بيل", "ألبيرت أينشتاين"], correct: 1 },
+        { question: "ما هو العضو المسؤول عن ضخ الدم في الجسم؟", options: ["الرئتان", "الكبد", "المخ", "القلب"], correct: 3 },
+        { question: "ما هي أكبر دولة في العالم من حيث المساحة؟", options: ["كندا", "الصين", "روسيا", "الولايات المتحدة"], correct: 2 },
+        { question: "كم عدد ألوان قوس قزح؟", options: ["5 ألوان", "6 ألوان", "7 ألوان", "8 ألوان"], correct: 2 },
+        { question: "ما هو المعدن السائل الوحيد في درجة الحرارة العادية؟", options: ["الحديد", "الزئبق", "النحاس", "الألومنيوم"], correct: 1 },
+        { question: "أي غاز يتنفسه الإنسان والكائنات الحية؟", options: ["النيتروجين", "الهيدروجين", "الأكسجين", "ثاني أكسيد الكربون"], correct: 2 },
+        { question: "ما هي عاصمة المملكة العربية السعودية؟", options: ["جدة", "مكة المكرمة", "الرياض", "الدمام"], correct: 2 },
+        { question: "ما هو أطول نهر في العالم؟", options: ["نهر الأمازون", "نهر النيل", "نهر المسيسيبي", "نهر اليانغتشي"], correct: 1 },
+        { question: "ما هي أصغر قارة في العالم؟", options: ["أوروبا", "أفريقيا", "أستراليا", "أمريكا الجنوبية"], correct: 2 },
+        { question: "في أي قارة تقع دولة البرازيل؟", options: ["أمريكا الشمالية", "آسيا", "أفريقيا", "أمريكا الجنوبية"], correct: 3 },
+        { question: "كم عدد أسنان الشخص البالغ الطبيعي؟", options: ["28 سناً", "30 سناً", "32 سناً", "34 سناً"], correct: 2 },
+        { question: "ما هو الحيوان الملقب بسفينة الصحراء؟", options: ["الحصان", "الجمل", "الحمار الوحشي", "الفهد"], correct: 1 },
+        { question: "ما هو العلم الذي يدرس الأرض وطبقاتها؟", options: ["الفيزياء", "الجيولوجيا", "الفلك", "الأحياء"], correct: 1 },
+        { question: "ما هو الغاز الرئيسي المسبب للاحتباس الحراري？", options: ["الأكسجين", "النيتروجين", "ثاني أكسيد الكربون", "الهيليوم"], correct: 2 },
+        { question: "ما هي أكبر جزيرة في العالم؟", options: ["مدغشقر", "جرينلاند", "قبرص", "أستراليا"], correct: 1 },
+        { question: "كم يبلغ عدد خطوط الطول الوهمية للأرض؟", options: ["180 خطاً", "240 خطاً", "360 خطاً", "400 خطاً"], correct: 2 },
+        { question: "ما هو أقرب كوكب إلى الشمس؟", options: ["الزهرة", "عطارد", "الأرض", "المريخ"], correct: 1 },
+        { question: "ما هي العملة الرسمية لدول الاتحاد الأوروبي؟", options: ["الدولار", "الجنيه الإسترليني", "اليورو", "الين"], correct: 2 },
+        { question: "من هو مكتشف الجاذبية الأرضية؟", options: ["إسحاق نيوتن", "غاليلو غاليلي", "ألبيرت أينشتاين", "فيثاغورس"], correct: 0 },
+        { question: "في أي مدينة توجد ساعة بيج بن الشهيرة؟", options: ["باريس", "نيويورك", "لندن", "روما"], correct: 2 },
+        { question: "ما هي الدولة الأكثر إنتاجاً للبن في العالم؟", options: ["كولومبيا", "إثيوبيا", "البرازيل", "اليمن"], correct: 2 },
+        { question: "ما هو الطائر الذي يضع أكبر بيضة في العالم؟", options: ["النسر", "النعامة", "البطة", "البومة"], correct: 1 },
+        { question: "كم عدد صمامات قلب الإنسان؟", options: ["صمامان", "3 صمامات", "4 صمامات", "5 صمامات"], correct: 2 },
+        { question: "أي كوكب يشتهر بوجود حلقات ضخمة حوله؟", options: ["أورانوس", "المشتري", "زحل", "نبتون"], correct: 2 },
+        { question: "كم عدد اللاعبين في فريق كرة القدم داخل الملعب؟", options: ["9 لاعبين", "10 لاعبين", "11 لاعباً", "12 لاعباً"], correct: 2 },
+        { question: "ما هي وحدة قياس التيار الكهربائي؟", options: ["الفولت", "الوات", "الأمبير", "الأوم"], correct: 2 },
+        { question: "ما هو العنصر الأكثر وفرة في الغلاف الجوي للأرض؟", options: ["الأكسجين", "الهيدروجين", "النيتروجين", "الأرجون"], correct: 2 },
+        { question: "ما هي عاصمة اليابان؟", options: ["أوساكا", "طوكيو", "كيوتو", "هيروشيما"], correct: 1 },
+        { question: "ما هو أكبر كائن حي يعيش على كوكب الأرض؟", options: ["الفيل الأفريقي", "الحوت الأزرق", "الديناصور", "القرش الأبيض"], correct: 1 },
+        { question: "من هو الرسام صاحب لوحة الموناليزا الشهيرة؟", options: ["بيكاسو", "فان جوخ", "ليوناردو دا فينشي", "ميكيلانجلو"], correct: 2 },
+        { question: "ما هي أكبر قارة في العالم من حيث المساحة؟", options: ["أفريقيا", "أوروبا", "آسيا", "أمريكا الشمالية"], correct: 2 },
+        { question: "ما هي الدولة الملقبة ببلد المليون شهيد؟", options: ["تونس", "مصر", "الجزائر", "فلسطين"], correct: 2 },
+        { question: "كم عدد الكواكب في مجموعتنا الشمسية؟", options: ["7 كواكب", "8 كواكب", "9 كواكب", "10 كواكب"], correct: 1 },
+        { question: "ما هي أصغر دولة في العالم مساحة؟", options: ["موناكو", "البحرين", "الفاتيكان", "سان مارينو"], correct: 2 },
+        { question: "ما هو الغاز المستخدم لإطفاء الحرائق؟", options: ["الأكسجين", "النيتروجين", "ثاني أكسيد الكربون", "الهيدروجين"], correct: 2 },
+        { question: "ما هي عاصمة فرنسا？", options: ["مارسيليا", "ليون", "باريس", "كان"], correct: 2 },
+        { question: "ما هو العضو المسؤول عن تصفية الدم في الجسم؟", options: ["المعدة", "المرارة", "الكلى", "الطحال"], correct: 2 },
+        { question: "كم عدد عظام جسم الشخص البالغ؟", options: ["180 عظمة", "206 عظمة", "250 عظمة", "300 عظمة"], correct: 1 },
+        { question: "ما هو الحيوان الثديي الوحيد الذي يمكنه الطيران؟", options: ["الخفاش", "الصقر", "السنجاب الطائر", "البومة"], correct: 0 },
+        { question: "ما هو الرمز الكيميائي لعنصر الحديد؟", options: ["Au", "Ag", "Fe", "Cu"], correct: 2 },
+        { question: "في أي قارة تقع الأهرامات الثلاثة؟", options: ["آسيا", "أفريقيا", "أوروبا", "أستراليا"], correct: 1 },
+        { question: "ما هو البحر الذي يمتلك أعلى نسبة ملوحة؟", options: ["البحر الأحمر", "البحر المتوسط", "البحر الميت", "بحر العرب"], correct: 2 },
+        { question: "كم عدد السعرات الحرارية في الماء؟", options: ["0 سعرة", "10 سعرات", "50 سعرة", "100 سعرة"], correct: 0 }
     ];
 
+    let quizData = []; 
     let currentQuestionIndex = 0;
     let score = 0;
+    let fireworksInterval;
 
     const questionEl = document.getElementById('question');
     const optionsContainer = document.getElementById('options');
@@ -220,21 +273,30 @@
     const resultScreen = document.getElementById('result-screen');
     const scoreEl = document.getElementById('score');
     const feedbackEl = document.getElementById('feedback-text');
+    const canvas = document.getElementById('fireworks-canvas');
+    const ctx = canvas.getContext('2d');
 
-    // تشغيل اللعبة
+    function prepareRandomQuestions() {
+        const shuffled = [...questionPool].sort(() => 0.5 - Math.random());
+        quizData = shuffled.slice(0, 5);
+    }
+
     function startQuiz() {
         currentQuestionIndex = 0;
         score = 0;
+        stopFireworks();
         quizScreen.style.display = 'block';
         resultScreen.style.display = 'none';
+        prepareRandomQuestions(); 
         showQuestion();
     }
 
-    // عرض السؤال الحالي
     function showQuestion() {
         nextBtn.style.display = 'none';
         optionsContainer.innerHTML = '';
         
+        if (quizData.length === 0) return;
+
         const currentQuestion = quizData[currentQuestionIndex];
         questionEl.innerText = currentQuestion.question;
         currentNumEl.innerText = currentQuestionIndex + 1;
@@ -249,12 +311,10 @@
         });
     }
 
-    // التحقق من الإجابة عند الضغط عليها
     function selectOption(selectedButton, index) {
         const currentQuestion = quizData[currentQuestionIndex];
         const allButtons = optionsContainer.querySelectorAll('.option-btn');
 
-        // تعطيل كل الأزرار بعد الاختيار حتى لا يضغط مرة أخرى
         allButtons.forEach(btn => btn.disabled = true);
 
         if (index === currentQuestion.correct) {
@@ -262,14 +322,12 @@
             score++;
         } else {
             selectedButton.classList.add('wrong');
-            // إظهار الإجابة الصحيحة باللون الأخضر ليتعلمها المستخدم
             allButtons[currentQuestion.correct].classList.add('correct');
         }
 
         nextBtn.style.display = 'block';
     }
 
-    // الانتقال للسؤال التالي أو إنهاء اللعبة
     function nextQuestion() {
         currentQuestionIndex++;
         if (currentQuestionIndex < quizData.length) {
@@ -279,7 +337,6 @@
         }
     }
 
-    // عرض شاشة النهاية والنتيجة
     function showResult() {
         quizScreen.style.display = 'none';
         resultScreen.style.display = 'block';
@@ -287,6 +344,7 @@
 
         if (score === 5) {
             feedbackEl.innerText = "عبقري خارق! إجاباتك كلها صحيحة 🏆🔥";
+            startFireworks(); // تشغيل الألعاب النارية فوراً عند الـ 5/5
         } else if (score >= 3) {
             feedbackEl.innerText = "ممتاز جداً! معلوماتك قوية وذكائك عالي ✨👏";
         } else {
@@ -298,8 +356,72 @@
         startQuiz();
     }
 
-    // البدء التلقائي عند تحميل الصفحة
-    startQuiz();
+    // --- برمجية نظام الألعاب النارية الذكي ---
+    let particles = [];
+    
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function createFirework() {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * (canvas.height * 0.4) + (canvas.height * 0.1);
+        const colors = ['#00f2fe', '#9d4edd', '#10b981', '#ef4444', '#ff007f', '#ffea00'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        for (let i = 0; i < 40; i++) {
+            particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                alpha: 1,
+                color: color
+            });
+        }
+    }
+
+    function updateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.05; // جاذبية خفيفة للأسفل
+            p.alpha -= 0.015;
+
+            if (p.alpha <= 0) {
+                particles.splice(i, 1);
+            } else {
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        if (canvas.style.display === 'block') {
+            requestAnimationFrame(updateParticles);
+        }
+    }
+
+    function startFireworks() {
+        canvas.style.display = 'block';
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        updateParticles();
+        fireworksInterval = setInterval(createFirework, 400); // إطلاق نار جديدة كل نصف ثانية تقريباً
+    }
+
+    function stopFireworks() {
+        canvas.style.display = 'none';
+        clearInterval(fireworksInterval);
+        particles = [];
+    }
+
+    window.onload = function() {
+        startQuiz();
+    };
 </script>
 
 </body>
